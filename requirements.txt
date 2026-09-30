@@ -1,0 +1,5 @@
+pyTelegramBotAPI
+redis
+ImageHash
+Pillow
+python-dotenv
