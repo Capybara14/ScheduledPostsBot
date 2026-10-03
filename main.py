@@ -126,8 +126,8 @@ def media_worker(message):
             bot.reply_to(
                 message,
                 f"""Найдено совпадение файлов! 
-• Новый: {str(file_hash)} 
-• Старый: {duplicate_file}""",
+    • Новый: {str(file_hash)} 
+    • Старый: {duplicate_file}""",
                 reply_markup=post_anyway(),
             )
         else:
@@ -211,11 +211,11 @@ def open_menu(message):
     bot.reply_to(
         message,
         f"""⚙️ *МЕНЮ*
-• Постов в очереди: _{r.llen("post_list")}_
-• Последний пост был: 
- — _{time.ctime(last_post)}_
-• С последнего поста прошло: 
- — _{round((time.time() - last_post) / 60, 2)} минут_ или _{round((time.time() - last_post) / 3600, 2)} часов_""",
+    • Постов в очереди: _{r.llen("post_list")}_
+    • Последний пост был: 
+     — _{time.ctime(last_post)}_
+    • С последнего поста прошло: 
+     — _{round((time.time() - last_post) / 60, 2)} минут_ или _{round((time.time() - last_post) / 3600, 2)} часов_""",
         reply_markup=settings_keyboard(),
         parse_mode="Markdown",
     )
@@ -305,11 +305,11 @@ def button_worker(call):
         last_post = float(r.get("last_post_time"))
         bot.edit_message_text(
             f"""⚙️ *МЕНЮ*
-• Постов в очереди: _{r.llen("post_list")}_
-• Последний пост был: 
- — _{time.ctime(last_post)}_
-• С последнего поста прошло: 
- — _{round((time.time() - last_post) / 60, 2)} минут_ или _{round((time.time() - last_post) / 3600, 2)} часов_""",
+    • Постов в очереди: _{r.llen("post_list")}_
+    • Последний пост был: 
+     — _{time.ctime(last_post)}_
+    • С последнего поста прошло: 
+     — _{round((time.time() - last_post) / 60, 2)} минут_ или _{round((time.time() - last_post) / 3600, 2)} часов_""",
             call.message.chat.id, call.message.message_id,
             reply_markup=settings_keyboard(),
             parse_mode="Markdown",
