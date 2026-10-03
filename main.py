@@ -136,34 +136,42 @@ def media_worker(message):
             bot.reply_to(message, f"В очередь добавлен файл {file_id} ({str(file_hash)})")
 
     elif message.video:
-        file_id = message.video.file_id
-        if message.video.thumbnail:
-            thumb_id = message.video.thumbnail.file_id
-            downloaded_bytes = bot.download_file(bot.get_file(thumb_id).file_path)
-            img = Image.open(io.BytesIO(downloaded_bytes))
-            file_hash = imagehash.phash(img)
+            file_id = message.video.file_id
+            is_duplicate = False
+            duplicate_file = 0
+            file_hash = None
 
-            if 4 <= file_hash.hash.sum() <= 60:
-                is_duplicate = False
-                for item in r.lrange("hash_list", 0, -1):
-                    diff = file_hash - imagehash.hex_to_hash(item)
-                    if diff <= DIFF_VALUE:
-                        print(f"Было найдено совпадение видео с {item}")
-                        is_duplicate = True
-                        break
-                if is_duplicate:
-                    bot.reply_to(
-                        message,
-                        f"Этот файл уже постили! {file_id} ({str(file_hash)})",
-                        reply_markup=post_anyway(),
-                    )
-                    return
+            if message.video.thumbnail:
+                preview_file_id = message.video.thumbnail.file_id
+                downloaded_bytes = bot.download_file(bot.get_file(preview_file_id).file_path)
+                img = Image.open(io.BytesIO(downloaded_bytes))
+                ph = imagehash.phash(img)
+
+                if 4 <= ph.hash.sum() <= 60:
+                    file_hash = ph
+                    for item in r.lrange("hash_list", 0, -1):
+                        diff = file_hash - imagehash.hex_to_hash(item)
+                        if diff <= DIFF_VALUE:
+                            print(f"Было найдено совпадение видео с {item}")
+                            duplicate_file = item
+                            is_duplicate = True
+                            break
+
+            if is_duplicate:
+                bot.reply_to(
+                    message,
+                    f"""Найдено совпадение файлов! 
+    • Новый: {str(file_hash)} 
+    • Старый: {duplicate_file}""",
+                    reply_markup=post_anyway(),
+                )
+            else:
                 r.rpush("post_list", f"vid:{file_id}")
-                r.rpush("hash_list", str(file_hash))
-                bot.reply_to(message, f"В очередь добавлен файл {file_id} ({str(file_hash)})")
-                return
-        r.rpush("post_list", f"vid:{file_id}")
-        bot.reply_to(message, f"В очередь добавлен файл {file_id}")
+                if file_hash:
+                    r.rpush("hash_list", str(file_hash))
+                    bot.reply_to(message, f"В очередь добавлен файл {file_id} ({str(file_hash)})")
+                else:
+                    bot.reply_to(message, f"В очередь добавлен файл {file_id}")
 
 
 # # Отдаёт статистику
