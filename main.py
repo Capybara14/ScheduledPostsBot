@@ -285,7 +285,7 @@ def bd_keyboard():
 
 def post_anyway():
     markup = types.InlineKeyboardMarkup(row_width=1)
-    btn_post_anyway = types.InlineKeyboardButton("Всё равно добавить", callback_data="btn_post_anyway")
+    btn_post_anyway = types.InlineKeyboardButton("Добавить всё равно", callback_data="btn_post_anyway")
     markup.add(btn_post_anyway)
     return markup
 
