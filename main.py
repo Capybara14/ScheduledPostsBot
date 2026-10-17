@@ -81,7 +81,9 @@ def posting_checker():
                 r.set("schedule", schedule)
             if int(schedule[:2]) <= (time.gmtime().tm_hour + TIMEZONE_OFFSET) % 24 <= int(schedule[2:]) and (
                     time.time() - float(last_post)) > interval and r.llen('post_list') > 0:
-                posting()
+                st = posting()
+                if st != True:
+                    print('Ошибка в posting')
         except:
             print('Ошибка в posting_checker')
         time.sleep(TIMEOUT)
@@ -90,15 +92,18 @@ def posting_checker():
 # Постит и обновляет таймер
 def posting():
     channel_id = r.get("channel_id")
-    if channel_id is None:
-        bot.send_message(OWNER_ID, 'Канал не выбран')
-        return
-    pic_id = r.lpop("post_list")
+    if not channel_id:
+        return False
+    pic_id = r.lindex("post_list", 0)
+    if not pic_id:
+        return False
     if pic_id[:3] == 'img':
         bot.send_photo(channel_id, photo=pic_id[4:])
     else:
         bot.send_video(channel_id, video=pic_id[4:])
+    r.lpop("post_list")
     r.set("last_post_time", time.time())
+    return True
 
 
 # Записывает посты в очередь
@@ -136,42 +141,42 @@ def media_worker(message):
             bot.reply_to(message, f"В очередь добавлен файл {file_id} ({str(file_hash)})")
 
     elif message.video:
-            file_id = message.video.file_id
-            is_duplicate = False
-            duplicate_file = 0
-            file_hash = None
+        file_id = message.video.file_id
+        is_duplicate = False
+        duplicate_file = 0
+        file_hash = None
 
-            if message.video.thumbnail:
-                preview_file_id = message.video.thumbnail.file_id
-                downloaded_bytes = bot.download_file(bot.get_file(preview_file_id).file_path)
-                img = Image.open(io.BytesIO(downloaded_bytes))
-                ph = imagehash.phash(img)
+        if message.video.thumbnail:
+            preview_file_id = message.video.thumbnail.file_id
+            downloaded_bytes = bot.download_file(bot.get_file(preview_file_id).file_path)
+            img = Image.open(io.BytesIO(downloaded_bytes))
+            ph = imagehash.phash(img)
 
-                if 4 <= ph.hash.sum() <= 60:
-                    file_hash = ph
-                    for item in r.lrange("hash_list", 0, -1):
-                        diff = file_hash - imagehash.hex_to_hash(item)
-                        if diff <= DIFF_VALUE:
-                            print(f"Было найдено совпадение видео с {item}")
-                            duplicate_file = item
-                            is_duplicate = True
-                            break
+            if 4 <= ph.hash.sum() <= 60:
+                file_hash = ph
+                for item in r.lrange("hash_list", 0, -1):
+                    diff = file_hash - imagehash.hex_to_hash(item)
+                    if diff <= DIFF_VALUE:
+                        print(f"Было найдено совпадение видео с {item}")
+                        duplicate_file = item
+                        is_duplicate = True
+                        break
 
-            if is_duplicate:
-                bot.reply_to(
-                    message,
-                    f"""Найдено совпадение файлов! 
+        if is_duplicate:
+            bot.reply_to(
+                message,
+                f"""Найдено совпадение файлов! 
     • Новый: {str(file_hash)} 
     • Старый: {duplicate_file}""",
-                    reply_markup=post_anyway(),
-                )
+                reply_markup=post_anyway(),
+            )
+        else:
+            r.rpush("post_list", f"vid:{file_id}")
+            if file_hash:
+                r.rpush("hash_list", str(file_hash))
+                bot.reply_to(message, f"В очередь добавлен файл {file_id} ({str(file_hash)})")
             else:
-                r.rpush("post_list", f"vid:{file_id}")
-                if file_hash:
-                    r.rpush("hash_list", str(file_hash))
-                    bot.reply_to(message, f"В очередь добавлен файл {file_id} ({str(file_hash)})")
-                else:
-                    bot.reply_to(message, f"В очередь добавлен файл {file_id}")
+                bot.reply_to(message, f"В очередь добавлен файл {file_id}")
 
 
 # # Отдаёт статистику
