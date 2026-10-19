@@ -23,7 +23,7 @@ OWNER_ID = int(os.getenv("OWNER_ID"))
 BOT_ID = os.getenv("BOT_USERNAME")
 REDIS_URL = os.getenv("REDIS_URL")
 
-bot = telebot.TeleBot(BOT_TOKEN, threaded=True)
+bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 r = redis.from_url(
     REDIS_URL,
     decode_responses=True
