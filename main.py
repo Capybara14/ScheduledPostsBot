@@ -220,7 +220,7 @@ def open_menu(message):
     • Последний пост был: 
      — _{time.ctime(last_post)}_
     • С последнего поста прошло: 
-     — _{round((time.time() - last_post) / 60, 2)} минут_ или _{round((time.time() - last_post) / 3600, 2)} часов_""",
+     — _{round((time.time() - last_post) / 60)} минут_ или _{round((time.time() - last_post) / 3600, 1)} часов_""",
         reply_markup=settings_keyboard(),
         parse_mode="Markdown",
     )
