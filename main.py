@@ -48,6 +48,8 @@ def start_worker(message):
     if len(parts) == 1:
         bot.reply_to(message, 'Привет! Это бот для автоматического управления отложкой в канале')
     else:
+        if not verificator(message):
+            return
         bot.delete_message(message.chat.id, message.message_id)
         if parts[1][:4] == 'del_':
             indx = r.lindex("post_list", int(parts[1][4:]) - 1)
@@ -260,7 +262,7 @@ def interval_keyboard():
     return markup
 
 
-# Клавиатура канала
+# Клавиатура выбора канала
 def channel_keyboard():
     markup = types.InlineKeyboardMarkup(row_width=1)
     btn_change_channel = types.InlineKeyboardButton("✏️ Изменить", callback_data="btn_change_channel")
