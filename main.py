@@ -20,7 +20,7 @@ TIMEZONE_OFFSET = 3  # Часовой пояс
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OWNER_ID = int(os.getenv("OWNER_ID"))
-BOT_ID = os.getenv("BOT_USERNAME")
+BOT_USERNAME = os.getenv("BOT_USERNAME")
 REDIS_URL = os.getenv("REDIS_URL")
 
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
@@ -362,7 +362,7 @@ def button_worker(call):
         full_bd, number = [], 0
         for i in r.lrange("post_list", 0, -1):
             number += 1
-            full_bd.append(f"{number}. [{i}](https://t.me/{BOT_ID}?start={number})")
+            full_bd.append(f"{number}. [{i}](https://t.me/{BOT_USERNAME}?start={number})")
         big_parts_bd = []
         for i in range(0, len(full_bd), ONE_PAGE_SIZE):
             big_parts_bd.append('\n'.join(full_bd[i:i + ONE_PAGE_SIZE]))
@@ -383,7 +383,7 @@ def button_worker(call):
         full_bd, number = [], 0
         for i in r.lrange("post_list", 0, -1):
             number += 1
-            full_bd.append(f"{number}. [{i}](https://t.me/{BOT_ID}?start=del_{number})")
+            full_bd.append(f"{number}. [{i}](https://t.me/{BOT_USERNAME}?start=del_{number})")
         big_parts_bd = []
         for i in range(0, len(full_bd), ONE_PAGE_SIZE):
             big_parts_bd.append('\n'.join(full_bd[i:i + ONE_PAGE_SIZE]))
