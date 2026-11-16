@@ -33,7 +33,6 @@ r = redis.from_url(
 while True:
     try:
         bot.set_my_commands([
-            types.BotCommand("start", "Приветствие"),
             types.BotCommand("menu", "Меню")
         ])
         break
